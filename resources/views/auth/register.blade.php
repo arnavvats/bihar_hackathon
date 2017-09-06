@@ -25,6 +25,18 @@
                             </div>
                         </div>
 
+                        <div class="form-group{{ $errors->has('user_types_id') ? ' has-error' : '' }}">
+                            <label for="user_types_id" class="col-md-4 control-label">Designationgit </label>
+                            <div class="col-md-6">
+                                <input id="user_types_id" class="form-control" name="user_types_id" value="{{ old('user_types_id') }}" required>
+
+                                @if ($errors->has('user_types_id'))
+                                    <span class="help-block">
+                                        <strong>{{ $errors->first('user_types_id') }}</strong>
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
                         <div class="form-group{{ $errors->has('email') ? ' has-error' : '' }}">
                             <label for="email" class="col-md-4 control-label">E-Mail Address</label>
 
