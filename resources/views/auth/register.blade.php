@@ -26,9 +26,13 @@
                         </div>
 
                         <div class="form-group{{ $errors->has('user_types_id') ? ' has-error' : '' }}">
-                            <label for="user_types_id" class="col-md-4 control-label">Designationgit </label>
+                            <label for="user_types_id" class="col-md-4 control-label">Designation</label>
                             <div class="col-md-6">
-                                <input id="user_types_id" class="form-control" name="user_types_id" value="{{ old('user_types_id') }}" required>
+                                <select name="user_types_id" id="user_types_id" class="form-control" id="sel1" required>
+                                    @foreach($designations as $designation)
+                                    <option value="{{$designation->id}}">{{$designation->name}}</option>
+                                    @endforeach
+                                </select>
 
                                 @if ($errors->has('user_types_id'))
                                     <span class="help-block">
