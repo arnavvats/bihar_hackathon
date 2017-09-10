@@ -14,4 +14,13 @@
   {!!Form::submit('Upload Bill',['class'=>'btn btn-primary','rows'=>3])!!}
 </div>
 {!! Form::close() !!}
+@if ($errors->any())
+  <div class="alert alert-danger">
+    <ul>
+      @foreach ($errors->all() as $error)
+        <li>{{ $error }}</li>
+      @endforeach
+    </ul>
+  </div>
+@endif
 @endsection

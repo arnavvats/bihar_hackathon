@@ -7,7 +7,7 @@
       {{$bill->description}}
     </div>
     <div class="col-xs-6">
-      <img src="images/{{$bill->scanned_copy_path}}">
+      <img src="{{URL::asset('/images/'.$bill->scanned_copy_path)}}">
     </div>
   </div>
     {!! Form::open(['method'=>'GET','action'=>['BillController@edit',$bill->id]]) !!}

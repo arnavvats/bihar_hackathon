@@ -1,12 +1,15 @@
 <?php
-
 namespace App\Http\Controllers\Auth;
-
+use App\UserType;
+use DB;
+use Mail;
+use Session;
 use App\User;
+use Validator;
+use Illuminate\Http\Request;
+use App\Mail\EmailVerification;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
-
 class RegisterController extends Controller
 {
     /*
@@ -19,16 +22,19 @@ class RegisterController extends Controller
     | provide this functionality without requiring any additional code.
     |
     */
-
     use RegistersUsers;
-
     /**
-     * Where to redirect users after registration.
+     * Where to redirect users after login / registration.
      *
      * @var string
      */
-    protected $redirectTo = '/home';
+    public function showRegistrationForm()
+    {
+        $designations = UserType::all();
+        return view('auth.register',compact('designations'));
+    }
 
+    protected $redirectTo = '/home';
     /**
      * Create a new controller instance.
      *
@@ -38,7 +44,6 @@ class RegisterController extends Controller
     {
         $this->middleware('guest');
     }
-
     /**
      * Get a validator for an incoming registration request.
      *
@@ -48,26 +53,57 @@ class RegisterController extends Controller
     protected function validator(array $data)
     {
         return Validator::make($data, [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:6|confirmed',
+            'name' => 'required|max:255',
+            'email' => 'required|email|max:255|unique:users',
+            'password' => 'required|min:6|confirmed',
             'user_types_id'=>'required|integer'
         ]);
     }
-
     /**
      * Create a new user instance after a valid registration.
      *
      * @param  array  $data
-     * @return \App\User
+     * @return User
      */
     protected function create(array $data)
     {
         return User::create([
             'name' => $data['name'],
             'email' => $data['email'],
-            'user_types_id'=>$data['user_types_id'],
             'password' => bcrypt($data['password']),
+            'email_token' => str_random(10),
+            'user_types_id'=>$data['user_types_id']
         ]);
+    }
+    public function register(Request $request)
+    {
+        //return $request->all();
+        // Laravel validation
+        $this->validator($request->all())->validate();
+        // Using database transactions is useful here because stuff happening is actually a transaction
+        // I don't know what I said in the last line! Weird!
+        DB::beginTransaction();
+        try
+        {
+            $user = $this->create($request->all());
+            // After creating the user send an email with the random token generated in the create method above
+            $email = new EmailVerification(new User(['email_token' => $user->email_token, 'name' => $user->name]));
+            Mail::to($user->email)->send($email);
+            DB::commit();
+            Session::flash('message', 'We have sent you a verification email!');
+            return back();
+        }
+        catch(Exception $e)
+        {
+            DB::rollback();
+            return back();
+        }
+    }
+    public function verify($token)
+    {
+        // The verified method has been added to the user model and chained here
+        // for better readability
+        User::where('email_token',$token)->firstOrFail()->verified();
+        return redirect('login');
     }
 }

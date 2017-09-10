@@ -21,3 +21,4 @@ Route::get('/home', 'HomeController@index')->name('home');
 Route::resource('/bill','BillController')->middleware('auth');
 Route::get('/invoice/create/{id}','InvoiceController@create')->middleware('auth');
 Route::resource('/invoice','InvoiceController',['except'=>'create'])->middleware('auth');
+Route::get('/register/verify/{token}', 'Auth\RegisterController@verify');

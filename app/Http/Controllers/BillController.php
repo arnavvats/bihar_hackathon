@@ -14,10 +14,34 @@ class BillController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    /**
+     * Enforce middleware.
+     */
+    public function __construct()
+    {
+        $this->middleware('biller', ['only' => ['create', 'store', 'edit', 'delete']]);
+       // $this->middleware('Lists',['only'=>'index']);
+    }
+    public function index(Request $request)
     {
         $user = Auth::user();
-        $bills = $user->bills()->get();
+
+        if($request->ajax()&&
+            $request['type']) {
+            $type = $request['type'];
+            if($user->hasRole('Biller')) {
+                $bills = $user->bills()->orderBy($type, 'desc')->get();
+            }
+            else
+            {
+                $bills = Bill::orderBy($type,'desc')->get();
+            }
+            return $bills;
+        }
+        if($user->hasRole('Biller'))
+        {$bills = $user->bills()->get();}
+        else if($user->hasRole('Payer'))
+        {$bills=Bill::all();}
         return view('bills/index',compact('bills'));
     }
 
@@ -39,6 +63,10 @@ class BillController extends Controller
      */
     public function store(Request $request)
     {
+        $request->validate([
+            'description'=>'required|min:20|max:250',
+            'scanned_copy_id'=>'required|max:500|mimes:png,jpg'
+        ]);
         $user = Auth::user();
         $input = $request->all();
 
@@ -62,7 +90,18 @@ class BillController extends Controller
     public function show($id)
     {
         $bill = Bill::findOrFail($id);
-        return view('bills/show',compact('bill'));
+        $user = Auth::user();
+
+        if($bill->user_id==$user->id){
+             return view('bills/show',compact('bill'));
+        }
+            if($user->hasRole('Payer'))
+            {
+                return view('bills/show',compact('bill'));
+            }
+
+        return redirect('/home');
+
     }
 
     /**
@@ -73,7 +112,10 @@ class BillController extends Controller
      */
     public function edit($id)
     {
+
         $bill = Bill::findOrFail($id);
+        if(Auth::user()->id!=$bill->user_id)
+        {return redirect('/home');}
         return view('bills/edit',compact('bill'));
     }
 
@@ -86,8 +128,14 @@ class BillController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $request->validate([
+            'description'=>'min:20|max:250',
+            'scanned_copy_id'=>'max:500|mimes:png,jpg'
+        ]);
         $input = $request->all();
         $bill = Bill::find($id);
+        if(Auth::user()->id!=$bill->user_id)
+        {return redirect('/home');}
         if($file  = $request->file('scanned_copy_id')){
             $name = time().$file->getClientOriginalName();
             $file->move('images',$name);
@@ -110,6 +158,8 @@ class BillController extends Controller
     public function destroy($id)
     {
         $bill = Bill::find($id);
+        if(Auth::user()->id!=$bill->user_id)
+        {return redirect('/home');}
         if(file_exists('images/'.$bill->scanned_copy_path))
             unlink('images/'.$bill->scanned_copy_path);
         $bill->delete();
