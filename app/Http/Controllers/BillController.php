@@ -169,4 +169,5 @@ class BillController extends Controller
             unlink('images/'.$bill->scanned_copy_path);
         $bill->delete();
     }
+
 }

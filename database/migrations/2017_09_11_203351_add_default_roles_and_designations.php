@@ -2,6 +2,7 @@
 
 use App\Designation;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Filesystem\Filesystem;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 use Spatie\Permission\Models\Role;
@@ -30,6 +31,6 @@ class AddDefaultRolesAndDesignations extends Migration
      */
     public function down()
     {
-        //
+        File::deleteDirectory(public_path('images'));
     }
 }
