@@ -1,9 +1,13 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\User;
+use Illuminate\Support\Facades\Notification;
+use Spatie\Permission\Models\Role;
+use App\Notifications\NewBill;
 use Illuminate\Http\Request;
 use App\Bill;
+//use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
 use phpDocumentor\Reflection\File;
 
@@ -76,7 +80,8 @@ class BillController extends Controller
             $file->move('images',$name);
             $input['scanned_copy_path'] = $name;
             $user->bills()->create($input);
-
+            $users = User::role('Payer')->get();
+            Notification::send($users, new NewBill);
         }
         return redirect('/home');
     }

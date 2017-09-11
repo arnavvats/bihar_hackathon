@@ -2,6 +2,8 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Spatie\Permission\Models\Role;
+
 
 class CreatePermissionTables extends Migration
 {
@@ -69,6 +71,8 @@ class CreatePermissionTables extends Migration
 
             $table->primary(['permission_id', 'role_id']);
         });
+
+
     }
 
     /**

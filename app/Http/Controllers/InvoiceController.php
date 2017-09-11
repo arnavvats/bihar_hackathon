@@ -58,6 +58,7 @@ class InvoiceController extends Controller
             $file->move('images',$name);
             $input['scanned_copy_path'] = $name;
             $user->invoices()->create($input);
+            Notification::send($user, new InvoiceCreated);
 
         }
         return redirect('/home');

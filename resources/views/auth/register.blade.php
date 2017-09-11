@@ -25,18 +25,34 @@
                             </div>
                         </div>
 
-                        <div class="form-group{{ $errors->has('user_types_id') ? ' has-error' : '' }}">
+                        <div class="form-group{{ $errors->has('designation') ? ' has-error' : '' }}">
                             <label for="user_types_id" class="col-md-4 control-label">Designation</label>
                             <div class="col-md-6">
-                                <select name="user_types_id" id="user_types_id" class="form-control" id="sel1" required>
+                                <select name="designation" id="designation" class="form-control" required>
                                     @foreach($designations as $designation)
-                                    <option value="{{$designation->id}}">{{$designation->name}}</option>
+                                    <option value="{{$designation->name}}">{{$designation->name}}</option>
                                     @endforeach
                                 </select>
 
-                                @if ($errors->has('user_types_id'))
+                                @if ($errors->has('designation'))
                                     <span class="help-block">
-                                        <strong>{{ $errors->first('user_types_id') }}</strong>
+                                        <strong>{{ $errors->first('designation') }}</strong>
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="form-group{{ $errors->has('role') ? ' has-error' : '' }}">
+                            <label for="role" class="col-md-4 control-label">Role</label>
+                            <div class="col-md-6">
+                                <select name="role" id="role" class="form-control" required>
+                                    @foreach($roles as $role)
+                                        <option value="{{$role->name}}">{{$role->name}}</option>
+                                    @endforeach
+                                </select>
+
+                                @if ($errors->has('role'))
+                                    <span class="help-block">
+                                        <strong>{{ $errors->first('role') }}</strong>
                                     </span>
                                 @endif
                             </div>

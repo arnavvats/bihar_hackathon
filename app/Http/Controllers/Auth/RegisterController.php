@@ -1,10 +1,11 @@
 <?php
 namespace App\Http\Controllers\Auth;
-use App\UserType;
+use App\Designation;
 use DB;
 use Mail;
 use Session;
 use App\User;
+use Spatie\Permission\Models\Role;
 use Validator;
 use Illuminate\Http\Request;
 use App\Mail\EmailVerification;
@@ -30,8 +31,9 @@ class RegisterController extends Controller
      */
     public function showRegistrationForm()
     {
-        $designations = UserType::all();
-        return view('auth.register',compact('designations'));
+        $designations = Designation::all();
+        $roles = Role::all();
+        return view('auth.register',compact('roles','designations'));
     }
 
     protected $redirectTo = '/home';
@@ -56,7 +58,8 @@ class RegisterController extends Controller
             'name' => 'required|max:255',
             'email' => 'required|email|max:255|unique:users',
             'password' => 'required|min:6|confirmed',
-            'user_types_id'=>'required|integer'
+            'designation'=>'required|string',
+            'role'=>'required'
         ]);
     }
     /**
@@ -72,7 +75,8 @@ class RegisterController extends Controller
             'email' => $data['email'],
             'password' => bcrypt($data['password']),
             'email_token' => str_random(10),
-            'user_types_id'=>$data['user_types_id']
+            'designation'=>$data['designation'],
+            'role'=>$data['role']
         ]);
     }
     public function register(Request $request)
