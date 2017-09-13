@@ -22,3 +22,4 @@ Route::resource('/bill','BillController')->middleware('auth');
 Route::get('/invoice/create/{id}','InvoiceController@create')->middleware('auth');
 Route::resource('/invoice','InvoiceController',['except'=>'create'])->middleware('auth');
 Route::get('/register/verify/{token}', 'Auth\RegisterController@verify');
+Route::get('/bill/{id}/verify','\App\Http\Controllers\BillController@verify');

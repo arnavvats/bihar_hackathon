@@ -18,6 +18,7 @@ class AddDefaultRolesAndDesignations extends Migration
     {
         Role::create(['name'=>'Payer']);
         Role::create(['name'=>'Biller']);
+        Role::create(['name'=>'Vendor']);
         Designation::create(['name'=>'Chief Engineer']);
         Designation::create(['name'=>'Executive Engineer']);
         Designation::create(['name'=>'Account Officer']);

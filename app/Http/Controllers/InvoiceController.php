@@ -2,9 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\User;
 use App\Invoice;
-use App\Bill;
+use Illuminate\Support\Facades\Notification;
+use Spatie\Permission\Models\Role;
+use App\Notifications\InvoiceCreated;
 use Illuminate\Http\Request;
+use App\Bill;
+//use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
 
 class InvoiceController extends Controller
@@ -58,11 +63,13 @@ class InvoiceController extends Controller
             $name = time().$file->getClientOriginalName();
             $file->move('images',$name);
             $input['scanned_copy_path'] = $name;
-            $user->invoices()->create($input);
+            $bill = $user->invoices()->create($input)->bill;
+            $bill->paid = 1;
+            $bill->save();
             Notification::send($user, new InvoiceCreated);
 
         }
-        return redirect('/home');
+        return redirect(action('BillController@show',$bill->id));
     }
 
     /**

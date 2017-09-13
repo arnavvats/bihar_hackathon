@@ -174,8 +174,14 @@ class BillController extends Controller
 
          abort(403, 'Unauthorized action.');
     }
-    public function  verify(){
-
+    public function  verify($id){
+            if(Auth::user()->hasRole('Payer')){
+                $bill = Bill::find($id);
+                $bill->verified = 1;
+                $bill->save();
+                return redirect()->back();
+            }
+            abort(100,'Unauthorized access.');
     }
 
 }
