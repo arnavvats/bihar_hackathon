@@ -18,6 +18,7 @@ class User extends Authenticatable
      *
      * @var array
      */
+
     protected $fillable = [
         'name', 'email', 'password','user_types_id','email_token'
     ];
@@ -45,6 +46,14 @@ class User extends Authenticatable
         $this->verified = 1;
         $this->email_token = null;
         $this->save();
+    }
+    public static function verifiedUsers(){
+        $users = User::all()->where('verified',1);
+        return $users;
+    }
+    public static function unverifiedUsers(){
+        $users = User::all()->where('verified',0);
+        return $users;
     }
 
 }

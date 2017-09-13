@@ -58,7 +58,7 @@ class RegisterController extends Controller
             'name' => 'required|max:255',
             'email' => 'required|email|max:255|unique:users',
             'password' => 'required|min:6|confirmed',
-            'designation'=>'required|string',
+            'designation'=>'required|integer',
             'role'=>'required'
         ]);
     }
@@ -75,9 +75,9 @@ class RegisterController extends Controller
             'email' => $data['email'],
             'password' => bcrypt($data['password']),
             'email_token' => str_random(10),
-            'designation'=>$data['designation'],
-            'role'=>$data['role']
-        ]);
+            'user_types_id'=>$data['designation'],
+
+        ])->assignRole($data['role']);
     }
     public function register(Request $request)
     {
@@ -95,7 +95,7 @@ class RegisterController extends Controller
             Mail::to($user->email)->send($email);
             DB::commit();
             Session::flash('message', 'We have sent you a verification email!');
-            return back();
+            return redirect('/login');
         }
         catch(Exception $e)
         {

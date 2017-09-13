@@ -28,6 +28,7 @@ class BillController extends Controller
     }
     public function index(Request $request)
     {
+        session()->flash('status', 'Task was successful!');
         $user = Auth::user();
 
         if($request->ajax()&&
@@ -79,11 +80,13 @@ class BillController extends Controller
             $name = time().$file->getClientOriginalName();
             $file->move('images',$name);
             $input['scanned_copy_path'] = $name;
-            $user->bills()->create($input);
-            $users = User::role('Payer')->get();
+            $id = $user->bills()->create($input)->id;
+            $users = User::role('Payer')->where('verified',1)->get();
             Notification::send($users, new NewBill);
         }
-        return redirect('/home');
+        return redirect()->action(
+            'BillController@show',['id'=> $id]
+        );
     }
 
     /**
@@ -97,15 +100,11 @@ class BillController extends Controller
         $bill = Bill::findOrFail($id);
         $user = Auth::user();
 
-        if($bill->user_id==$user->id){
+        if($bill->user_id==$user->id || $user->hasRole('Payer')){
              return view('bills/show',compact('bill'));
         }
-            if($user->hasRole('Payer'))
-            {
-                return view('bills/show',compact('bill'));
-            }
 
-        return redirect('/home');
+        return redirect()->back();
 
     }
 
@@ -119,9 +118,10 @@ class BillController extends Controller
     {
 
         $bill = Bill::findOrFail($id);
-        if(Auth::user()->id!=$bill->user_id)
-        {return redirect('/home');}
-        return view('bills/edit',compact('bill'));
+        if (Auth::user()->id == $bill->user_id) {
+            return view('bills/edit', compact('bill'));
+        }
+        return redirect()->back();
     }
 
     /**
@@ -140,7 +140,7 @@ class BillController extends Controller
         $input = $request->all();
         $bill = Bill::find($id);
         if(Auth::user()->id!=$bill->user_id)
-        {return redirect('/home');}
+        {abort(403, 'Unauthorized action.');}
         if($file  = $request->file('scanned_copy_id')){
             $name = time().$file->getClientOriginalName();
             $file->move('images',$name);
@@ -151,7 +151,7 @@ class BillController extends Controller
         $bill['description'] = $input['description'];
         $bill->save();
 
-        return redirect('/home');
+        return redirect('/bills');
     }
 
     /**
@@ -164,10 +164,18 @@ class BillController extends Controller
     {
         $bill = Bill::find($id);
         if(Auth::user()->id!=$bill->user_id)
-        {return redirect('/home');}
-        if(file_exists('images/'.$bill->scanned_copy_path))
-            unlink('images/'.$bill->scanned_copy_path);
-        $bill->delete();
+        {
+            if(file_exists('images/'.$bill->scanned_copy_path))
+                unlink('images/'.$bill->scanned_copy_path);
+            $bill->delete();
+            session()->flash('status', 'Task was successful!');
+            return redirect()->back();
+        }
+
+         abort(403, 'Unauthorized action.');
+    }
+    public function  verify(){
+
     }
 
 }

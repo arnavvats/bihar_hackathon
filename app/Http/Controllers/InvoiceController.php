@@ -36,6 +36,7 @@ class InvoiceController extends Controller
     public function create($id)
     {
         $bill = Bill::find($id);
+        if($bill->verified == 0){abort(401,'Bill Unverified.');}
         return view('invoices/create',compact('bill'));
     }
 
@@ -75,7 +76,7 @@ class InvoiceController extends Controller
         $user = Auth::user();
         $invoice = Bill::findOrFail($id)->invoice;
         if(!($invoice->user_id==$user->id||$invoice->bill->user_id==$user->id)){
-            return redirect('/home');
+            abort(403,'Unauthorized Action');
         }
         return view('invoices/show',compact('invoice'));
 
@@ -92,7 +93,7 @@ class InvoiceController extends Controller
 
         $invoice = Bill::findOrFail($id)->invoice;
         if(Auth::user()->id!=$invoice->user_id)
-            {return redirect('/home');}
+            {abort(403,'Unauthorized Action');}
         return view('invoices/edit',compact('invoice'));
     }
 
@@ -112,7 +113,7 @@ class InvoiceController extends Controller
         $input = $request->all();
         $invoice = Bill::find($id)->invoice;
         if(Auth::user()->id!=$invoice->user_id)
-        {return redirect('/home');}
+        {abort(403,'Unauthorized Action');}
         if($file  = $request->file('scanned_copy_id')){
             $name = time().$file->getClientOriginalName();
             $file->move('images',$name);
@@ -123,7 +124,7 @@ class InvoiceController extends Controller
         $invoice['description'] = $input['description'];
         $invoice->save();
 
-        return redirect('/home');
+        return redirect('/invoice');
     }
 
     /**
@@ -136,7 +137,7 @@ class InvoiceController extends Controller
     {
         $invoice = Bill::find($id)->invoice;
         if(Auth::user()->id!=$invoice->user_id){
-        return redirect('/home');
+        abort(403,'Unauthorized Action');
         }
         if(file_exists('images/'.$invoice->scanned_copy_path)) {
             unlink('images/' . $invoice->scanned_copy_path);

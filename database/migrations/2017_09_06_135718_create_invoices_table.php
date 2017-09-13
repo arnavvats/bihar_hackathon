@@ -18,7 +18,6 @@ class CreateInvoicesTable extends Migration
             $table->string('description');
             $table->string('scanned_copy_path');
             $table->integer('user_id');
-            $table->boolean('verified')->default(0);
             $table->integer('bill_id');
             $table->timestamps();
         });
